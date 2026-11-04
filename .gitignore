@@ -1,0 +1,27 @@
+*.iml
+.gradle/
+/local.properties
+.idea/
+.DS_Store
+build/
+/captures
+.externalNativeBuild
+.cxx
+.kotlin/
+*.apk
+*.aab
+*.keystore
+!debug.keystore
+
+# Model weights and large binaries never go into Git (AGENTS.md rule).
+*.bin
+*.gguf
+*.onnx
+
+# Benchmark corpora stay local (only README + reports are committed).
+/benchmark/audio/*
+!/benchmark/audio/README.md
+
+# Local agent workspace (never part of the repo).
+/_research/
+/.secrets/
