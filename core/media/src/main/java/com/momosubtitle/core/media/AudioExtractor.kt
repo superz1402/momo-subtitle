@@ -49,7 +49,8 @@ class AudioExtractor(private val context: Context) {
         if (outFile.exists()) outFile.delete()
 
         var writtenSamples = 0L
-        extractor.use { ex ->
+        val ex = extractor
+        try {
             ex.setDataSource(context, uri, null)
 
             var audioTrack = -1
@@ -174,6 +175,8 @@ class AudioExtractor(private val context: Context) {
             }
             out.flush()
             out.close()
+        } finally {
+            runCatching { ex.release() }
         }
 
         WavFile.patchDataSize(outFile, writtenSamples * WavFile.BYTES_PER_SAMPLE)

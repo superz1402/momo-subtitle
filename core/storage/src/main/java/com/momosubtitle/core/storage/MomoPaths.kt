@@ -8,9 +8,9 @@ import java.util.UUID
  * On-disk layout (docs/PROCESSING_PIPELINE.md):
  *
  * files/MomoSubtitle/
- *   models/whisper/*.bin
+ *   models/whisper/          — downloaded ggml .bin weights
  *   projects/{projectId}/audio/extracted.wav
- *   projects/{projectId}/chunks/chunk_0001.wav ...
+ *   projects/{projectId}/chunks/  — transient chunk_NNNN.wav files
  *   projects/{projectId}/exports/
  */
 class MomoPaths(private val context: Context) {

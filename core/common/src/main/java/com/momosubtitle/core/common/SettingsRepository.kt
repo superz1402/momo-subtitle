@@ -1,8 +1,6 @@
 package com.momosubtitle.core.common
 
 import android.content.Context
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -25,9 +23,6 @@ class SettingsRepository(private val context: Context) {
 
     private val dataStore = context.momoDataStore
 
-    /** Shared with ModelRepository so every consumer sees one DataStore instance. */
-    val store: DataStore<Preferences> get() = dataStore
-
     val settings: Flow<MomoSettings> = dataStore.data.map { p ->
         MomoSettings(
             transcribeThreads = p[KEY_THREADS] ?: defaultThreads(),
@@ -40,15 +35,15 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun current(): MomoSettings = settings.first()
 
-    suspend fun setThreads(value: Int) = dataStore.edit { it[KEY_THREADS] = value }
-    suspend fun setChunkSeconds(value: Int) = dataStore.edit { it[KEY_CHUNK_SECONDS] = value }
-    suspend fun setDefaultLanguage(value: String) = dataStore.edit { it[KEY_LANGUAGE] = value }
-    suspend fun setDefaultMode(value: String) = dataStore.edit { it[KEY_MODE] = value }
-    suspend fun setActiveModel(value: String) = dataStore.edit { it[KEY_ACTIVE_MODEL] = value }
+    suspend fun setThreads(value: Int) { dataStore.edit { it[KEY_THREADS] = value } }
+    suspend fun setChunkSeconds(value: Int) { dataStore.edit { it[KEY_CHUNK_SECONDS] = value } }
+    suspend fun setDefaultLanguage(value: String) { dataStore.edit { it[KEY_LANGUAGE] = value } }
+    suspend fun setDefaultMode(value: String) { dataStore.edit { it[KEY_MODE] = value } }
+    suspend fun setActiveModel(value: String) { dataStore.edit { it[KEY_ACTIVE_MODEL] = value } }
 
     private fun defaultThreads(): Int = Runtime.getRuntime().availableProcessors().coerceIn(2, 6)
 
-    companion object {
+    private companion object {
         val KEY_THREADS = intPreferencesKey("transcribe_threads")
         val KEY_CHUNK_SECONDS = intPreferencesKey("chunk_seconds")
         val KEY_LANGUAGE = stringPreferencesKey("default_language")

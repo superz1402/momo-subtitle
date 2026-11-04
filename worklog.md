@@ -43,8 +43,28 @@ session resumes from the last section of this file.
   TEST_PLAN, DESIGN_SYSTEM, UI_REFERENCE, RELEASE_CHECKLIST) + AGENTS.md
   (operating contract incl. operator's session rules) + this worklog.
 
+### 11:35 — [#9] Local build green, APK produced
+- Fixed on the way (all committed):
+  - system java was JRE-only → installed Temurin JDK 17 under
+    `/home/z/my-project/jdk17`; setup_sdk.sh now ensures it for future sessions.
+  - KDoc containing `whisper/*.bin` opened a nested Kotlin comment (syntax
+    error) → reworded.
+  - MediaExtractor `.use` unavailable → explicit try/finally release.
+  - `json` name shadowing in WhisperEngine → `jsonFormat`.
+  - DataStore `Preferences` leaked through SettingsRepository's public API
+    (inferred return types + public keys) → explicit Unit setters, private
+    companion; consumers no longer need the DataStore dependency.
+  - activity-compose dependency added to feature/import + feature/processing.
+  - Memory tuning for the 4 GB server: parallel=false, in-process Kotlin
+    compilation, 1280 m daemon heap, MaxMetaspace 384 m.
+- Result: `:app:assembleDebug` BUILD SUCCESSFUL; `:core:subtitles:test` 9/9
+  passing; APK 15.4 MB with libmomo_whisper_jni.so for arm64-v8a + x86_64;
+  aapt2 badging verified (com.momosubtitle.app, minSdk 26, target 35).
+- Tag `v0.1.0-m0.1` + GitHub Release with APK asset; APK + source ZIP copied
+  to `/home/z/my-project/download/`.
+
 ### Next
-- Push skeleton + code to github.com/superz1402/momo-subtitle (issues first).
-- Run `./gradlew :app:assembleDebug` on-server; fix until green.
-- Tag `v0.1.0-m0.1`, attach APK to GitHub Release, deliver APK + source ZIP.
-- Create the scheduled autosave/health job.
+- Device QA pass on the Moto G85 5G (docs/TEST_PLAN.md matrix) — needs the
+  physical device.
+- Phase 1: overlap merging, FFmpeg extraction, bilingual export.
+- Scheduled autosave/health agent job armed (every 30 min).

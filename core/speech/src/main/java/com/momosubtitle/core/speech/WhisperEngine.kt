@@ -23,8 +23,8 @@ class WhisperEngine {
 
     fun transcribe(wavPath: String, threads: Int, translate: Boolean, language: String): NativeResult {
         check(ctxPtr != 0L) { "Model not loaded — call open() first" }
-        val json = WhisperJni.transcribeWav(ctxPtr, wavPath, threads, translate, language)
-        return json.decodeFromString(NativeResult.serializer(), json)
+        val resultJson = WhisperJni.transcribeWav(ctxPtr, wavPath, threads, translate, language)
+        return jsonFormat.decodeFromString(NativeResult.serializer(), resultJson)
     }
 
     fun close() {
@@ -40,6 +40,6 @@ class WhisperEngine {
     private fun tempDirMarker(): String = "unused"
 
     companion object {
-        private val json = Json { ignoreUnknownKeys = true }
+        private val jsonFormat = Json { ignoreUnknownKeys = true }
     }
 }
