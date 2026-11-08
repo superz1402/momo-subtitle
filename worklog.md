@@ -164,3 +164,36 @@ session resumes from the last section of this file.
 - Next: rebuild v0.2.0 feature set in a working session (build → test →
   commit → PUSH each step), then tag v0.2.0 and publish the Release.
 - Reminder: rotate the PAT (same one pasted in plaintext again).
+
+## 2026-11-09 02:15 — v0.2.0 REBUILT and RELEASED (issues #13–#16 closed)
+
+- The lost 2026-11-08 v0.2.0 work was fully rebuilt and shipped:
+  - **#13** `ModelDownloadService` (dataSync FGS): notification progress
+    (%, MB, ETA, 500 ms throttle), Cancel action, terminal success/error,
+    `START_REDELIVER_INTENT` auto-resume; `AppServicesBridge.ModelDownloadRunner`
+    entry points; `ModelRepository.shared()` single instance shared by
+    screen + service; POST_NOTIFICATIONS rationale dialog on Models screen
+    ("Not now" still downloads).
+  - **#14** `ModelRepository.download()`: 6 attempts, backoff 1/2/4/8/15/30 s
+    + jitter, HTTP Range resume from `.part`, `Accept-Encoding: identity`,
+    HTTP 416 → restart, friendly error strings, 512 KB emission throttle,
+    speed B/s → ETA.
+  - **#15** downloads run in the service's scope (repo I/O on Dispatchers.IO),
+    UI only intents + StateFlow; both long jobs are dataSync FGS.
+  - **#16** in-repo keystore (`keystore/momo-release.jks` + `momo.properties`),
+    `momo` signingConfig on release AND debug; cert SHA-256
+    `e9f67c10…be4e08` verified identical on both APKs via apksigner.
+- Build green: `:app:assembleDebug :app:assembleRelease test` BUILD
+  SUCCESSFUL; tests 9/9. Badging: vc3, v0.2.0, both services dataSync,
+  POST_NOTIFICATIONS + FGS perms. Release APK 12.0 MB, debug 15.5 MB.
+- Build fix on the way: gradle.properties metaspace 384m→768m (OOM: Metaspace
+  with in-process Kotlin compiler on 4 GB host).
+- Pushed every step this time (lesson enforced): 5c37e1e (wip) → 1c670bc
+  (v0.2.0) → tag v0.2.0. Release 438427677 published with both APKs; issues
+  #13–#16 closed via commit message + API.
+- One-time operator note: uninstall v0.1.1 before installing v0.2.0 (old key
+  was lost); v0.2.0 onward updates install over each other.
+- Next: Moto G85 device QA (docs/TEST_PLAN.md — download through Doze +
+  Wi-Fi-drop retry, notification behavior, RTF/thermals); START_STICKY
+  follow-up only if QA shows kills; Phase 1 only on operator go-ahead;
+  rotate the PAT (same one again pasted in plaintext).
