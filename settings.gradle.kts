@@ -7,6 +7,9 @@ pluginManagement {
                 includeGroupByRegex("androidx.*")
             }
         }
+        // Mirrors first: Maven Central 429-rate-limits this build server.
+        maven("https://cache-redirector.jetbrains.com/repo1.maven.org/maven2")
+        maven("https://maven.aliyun.com/repository/public")
         mavenCentral()
         gradlePluginPortal()
     }
@@ -16,6 +19,9 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
+        // Mirrors first: Maven Central 429-rate-limits this build server.
+        maven("https://cache-redirector.jetbrains.com/repo1.maven.org/maven2")
+        maven("https://maven.aliyun.com/repository/public")
         mavenCentral()
     }
 }

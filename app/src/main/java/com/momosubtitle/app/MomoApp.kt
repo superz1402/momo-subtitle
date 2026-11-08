@@ -1,6 +1,7 @@
 package com.momosubtitle.app
 
 import android.app.Application
+import com.momosubtitle.app.service.TranscriptionService
 import com.momosubtitle.core.common.AppServicesBridge
 import com.momosubtitle.core.common.Graph
 import com.momosubtitle.core.processing.TranscriptionJobManager
@@ -17,5 +18,19 @@ class MomoApp : Application() {
             database = Graph.database,
             settings = Graph.settings
         )
+        // Foreground service entry points (background transcription + notification progress).
+        AppServicesBridge.transcription = object : AppServicesBridge.TranscriptionRunner {
+            override fun start(context: android.content.Context, runId: String) =
+                TranscriptionService.start(context, runId)
+
+            override fun pause(context: android.content.Context, runId: String) =
+                TranscriptionService.pause(context, runId)
+
+            override fun resume(context: android.content.Context, runId: String) =
+                TranscriptionService.resume(context, runId)
+
+            override fun cancel(context: android.content.Context, runId: String) =
+                TranscriptionService.cancel(context, runId)
+        }
     }
 }

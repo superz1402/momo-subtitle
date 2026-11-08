@@ -1,7 +1,6 @@
 package com.momosubtitle.feature.settings
 
 import android.content.Context
-import android.os.Build
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -35,7 +34,6 @@ import com.momosubtitle.core.common.TimeFormat
 import com.momosubtitle.core.models.ModelRepository
 import com.momosubtitle.core.speech.WhisperJni
 import com.momosubtitle.core.ui.MonoBody
-import com.momosubtitle.core.ui.MonoSmall
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(
@@ -156,21 +154,6 @@ fun SettingsScreen() {
             }
         }
 
-        SettingsCard("Device") {
-            Text(
-                "ABI: ${Build.SUPPORTED_ABIS.firstOrNull() ?: "unknown"}",
-                style = MonoSmall
-            )
-            Text(
-                "Cores: ${Runtime.getRuntime().availableProcessors()}",
-                style = MonoSmall
-            )
-            Text(
-                "whisper.cpp: ${vm.systemInfo}",
-                style = MonoSmall
-            )
-        }
-
         SettingsCard("Storage") {
             Text("Model storage: ${TimeFormat.humanBytes(vm.modelBytes)}", style = MonoBody)
             Spacer(Modifier.height(4.dp))
@@ -183,7 +166,7 @@ fun SettingsScreen() {
         }
 
         SettingsCard("About") {
-            Text("Momo Subtitle · 0.1.0-milestone-0.1", style = MaterialTheme.typography.titleSmall)
+            Text("Momo Subtitle · 0.1.1", style = MaterialTheme.typography.titleSmall)
             Spacer(Modifier.height(4.dp))
             Text(
                 "All speech recognition and translation run locally. No account, no API keys, " +

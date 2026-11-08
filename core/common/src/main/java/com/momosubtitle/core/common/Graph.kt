@@ -23,6 +23,11 @@ object Graph {
             "JobController not installed — the app module must set AppServicesBridge.jobController at startup"
         }
 
+    val transcription: AppServicesBridge.TranscriptionRunner
+        get() = checkNotNull(AppServicesBridge.transcription) {
+            "TranscriptionRunner not installed — the app module must set AppServicesBridge.transcription at startup"
+        }
+
     fun init(context: Context) {
         appContext = context.applicationContext
     }
@@ -32,4 +37,19 @@ object Graph {
 object AppServicesBridge {
     @Volatile
     var jobController: JobController? = null
+
+    /**
+     * Foreground-service entry points, installed by the app module. Feature
+     * screens route run control (and background-eligibility) through this so
+     * the on-screen controls and the notification stay in sync.
+     */
+    interface TranscriptionRunner {
+        fun start(context: Context, runId: String)
+        fun pause(context: Context, runId: String)
+        fun resume(context: Context, runId: String)
+        fun cancel(context: Context, runId: String)
+    }
+
+    @Volatile
+    var transcription: TranscriptionRunner? = null
 }

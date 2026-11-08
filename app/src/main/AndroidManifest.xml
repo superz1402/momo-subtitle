@@ -3,6 +3,10 @@
 
     <!-- Model installation only. All speech recognition and translation run fully offline. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Background transcription: keep work alive + show progress in the notification bar. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".MomoApp"
@@ -22,6 +26,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".service.TranscriptionService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
     </application>
 
 </manifest>

@@ -1,0 +1,10 @@
+<resources>
+    <!-- API 31+ splash screen: brand-colored background with the launcher icon,
+         removes the cold-start flash before Compose draws. -->
+    <style name="Theme.MomoSubtitle" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/window_background</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowSplashScreenBackground">@color/window_background</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+    </style>
+</resources>

@@ -1,12 +1,16 @@
 package com.momosubtitle.core.ui
 
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
@@ -38,8 +42,30 @@ private val DarkColors = darkColorScheme(
     onError = Color(0xFF3B0A0A)
 )
 
-/** M3 typography defaults; no custom font bundles in Milestone 0.1. */
-val MomoTypography = Typography()
+/**
+ * Typography override (UI rehaul): weight-contrast hierarchy — SemiBold
+ * titles with slightly tightened tracking, Normal body, Medium labels.
+ * Monospace stays reserved for SRT timestamps and engine output.
+ */
+val MomoTypography = Typography().run {
+    copy(
+        headlineMedium = headlineMedium.copy(fontWeight = FontWeight.SemiBold, letterSpacing = (-0.5).sp),
+        headlineSmall = headlineSmall.copy(fontWeight = FontWeight.SemiBold, letterSpacing = (-0.25).sp),
+        titleLarge = titleLarge.copy(fontWeight = FontWeight.SemiBold),
+        titleMedium = titleMedium.copy(fontWeight = FontWeight.SemiBold),
+        titleSmall = titleSmall.copy(fontWeight = FontWeight.Medium),
+        bodyLarge = bodyLarge.copy(lineHeight = 22.sp),
+        bodyMedium = bodyMedium.copy(lineHeight = 20.sp),
+        labelLarge = labelLarge.copy(fontWeight = FontWeight.Medium)
+    )
+}
+
+/** Corner system: cards 16 dp, sheets/drop-zones 20 dp (design study). */
+val MomoShapes = Shapes(
+    small = RoundedCornerShape(10.dp),
+    medium = RoundedCornerShape(16.dp),
+    large = RoundedCornerShape(20.dp)
+)
 
 /** Monospace styles for timestamps, codecs and counts (docs/DESIGN_SYSTEM.md). */
 val MonoSmall = TextStyle(fontFamily = FontFamily.Monospace, fontSize = 12.sp, lineHeight = 16.sp)
@@ -50,6 +76,7 @@ fun MomoSubtitleTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = DarkColors,
         typography = MomoTypography,
+        shapes = MomoShapes,
         content = content
     )
 }

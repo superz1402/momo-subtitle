@@ -40,7 +40,7 @@ object Routes {
 
 enum class TopLevelDestination(val route: String, val label: String, val icon: ImageVector) {
     HOME(Routes.HOME, "Home", Icons.Filled.Home),
-    MODELS(Routes.MODELS, "Models", Icons.Filled.List),
+    MODELS(Routes.MODELS, "Models", Icons.Filled.Build),
     SETTINGS(Routes.SETTINGS, "Settings", Icons.Filled.Settings)
 }
 

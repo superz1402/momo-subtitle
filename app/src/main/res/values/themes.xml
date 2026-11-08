@@ -1,8 +1,7 @@
 <resources>
     <style name="Theme.MomoSubtitle" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowBackground">@color/window_background</item>
-        <item name="android:statusBarColor">@color/window_background</item>
-        <item name="android:navigationBarColor">@color/window_background</item>
+        <!-- Status/nav bar colors are handled by enableEdgeToEdge() — do not pin them here. -->
         <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>

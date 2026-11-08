@@ -2,7 +2,11 @@ package com.momosubtitle.feature.processing
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,15 +14,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -44,17 +46,21 @@ import com.momosubtitle.core.subtitles.SubtitleSegment
 import com.momosubtitle.core.ui.Aqua
 import com.momosubtitle.core.ui.ErrRed
 import com.momosubtitle.core.ui.InfoBlue
+import com.momosubtitle.core.ui.MomoBackHeader
 import com.momosubtitle.core.ui.MonoBody
 import com.momosubtitle.core.ui.MonoSmall
 import com.momosubtitle.core.ui.OkGreen
+import com.momosubtitle.core.ui.Radius
+import com.momosubtitle.core.ui.Spacing
 import com.momosubtitle.core.ui.WarnAmber
 import com.momosubtitle.feature.export.SubtitleFileExporter
 import com.momosubtitle.feature.export.SubtitleFormat
 import kotlinx.coroutines.launch
 
 /**
- * Real processing progress (blueprint section 7): stage, per-chunk counts,
- * pause/resume/cancel, failed chunk reasons, and live caption preview.
+ * Processing dashboard (blueprint section 7): hero progress with percent +
+ * stage stepper, per-chunk counts, pause/resume/cancel via the foreground
+ * service (works in background), failed chunk reasons, live caption preview.
  */
 @Composable
 fun ProcessingScreen(runId: String, onBack: () -> Unit) {
@@ -85,82 +91,97 @@ fun ProcessingScreen(runId: String, onBack: () -> Unit) {
         ActivityResultContracts.CreateDocument("text/plain")
     ) { uri -> uri?.let { u -> scope.launch { exporter.write(u, SubtitleFormat.TXT, cues()) } } }
 
+    val r = run
     Column(Modifier.fillMaxSize()) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 8.dp)
-        ) {
-            IconButton(onClick = onBack) { Icon(Icons.Filled.ArrowBack, contentDescription = "Back") }
-            Column {
-                Text(
-                    project?.name ?: "Processing",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    run?.stage ?: "",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
+        MomoBackHeader(
+            title = project?.name ?: "Processing",
+            onBack = onBack,
+            subtitle = if (r != null && r.status != RunStatus.DONE.name) r.stage else null
+        )
 
-        val r = run
         if (r == null) {
-            Text("Run not found.", Modifier.padding(20.dp))
+            Text("Run not found.", Modifier.padding(Spacing.xl))
             return
         }
         val status = RunStatus.safe(r.status)
-
-        LinearProgressIndicator(
-            progress = {
-                if (r.totalChunks > 0) r.doneChunks.toFloat() / r.totalChunks else 0f
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp)
-                .height(4.dp)
+        val activeStatus = status == RunStatus.QUEUED || status == RunStatus.EXTRACTING ||
+            status == RunStatus.TRANSCRIBING || status == RunStatus.BUILDING
+        val percent = if (r.totalChunks > 0) r.doneChunks * 100 / r.totalChunks else 0
+        val animated by animateFloatAsState(
+            targetValue = if (r.totalChunks > 0) r.doneChunks.toFloat() / r.totalChunks else 0f,
+            animationSpec = tween(com.momosubtitle.core.ui.Motion.normal),
+            label = "progress"
         )
 
-        Column(Modifier.padding(20.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                StatusChip(status, r.doneChunks, r.totalChunks)
-                Spacer(Modifier.width(8.dp))
+        // ---- Hero progress block ----
+        Surface(
+            shape = RoundedCornerShape(Radius.sheet),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.xl, vertical = Spacing.md)
+        ) {
+            Column(Modifier.fillMaxWidth().padding(Spacing.lg)) {
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Text(
+                        "$percent%",
+                        style = MaterialTheme.typography.displaySmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = if (activeStatus) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(Modifier.weight(1f))
+                    StatusChip(status, r.doneChunks, r.totalChunks)
+                }
+                Spacer(Modifier.height(Spacing.md))
+                LinearProgressIndicator(
+                    progress = { animated },
+                    modifier = Modifier.fillMaxWidth().height(6.dp)
+                )
+                Spacer(Modifier.height(Spacing.md))
+                StageStepper(r.stage)
+                Spacer(Modifier.height(Spacing.sm))
                 Text(
                     "${r.doneChunks}/${r.totalChunks} chunks · ${r.modelId} · ${r.mode}",
-                    style = MonoBody,
+                    style = MonoSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+        }
 
-            Spacer(Modifier.height(12.dp))
-            when (status) {
-                RunStatus.QUEUED, RunStatus.EXTRACTING, RunStatus.TRANSCRIBING, RunStatus.BUILDING -> {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedButton(onClick = { Graph.jobController.pause(runId) }) { Text("Pause") }
-                        TextButton(onClick = { Graph.jobController.cancel(runId) }) { Text("Cancel") }
+        // ---- Controls (routed through the foreground service) ----
+        Column(Modifier.padding(horizontal = Spacing.xl)) {
+            when {
+                activeStatus -> Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                    OutlinedButton(onClick = { Graph.transcription.pause(context, runId) }) {
+                        Text("Pause")
+                    }
+                    TextButton(onClick = { Graph.transcription.cancel(context, runId) }) {
+                        Text("Cancel")
                     }
                 }
-                RunStatus.PAUSED, RunStatus.PARTIAL, RunStatus.FAILED -> {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Button(onClick = { Graph.jobController.resume(runId) }) {
+                status == RunStatus.PAUSED || status == RunStatus.PARTIAL || status == RunStatus.FAILED -> {
+                    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                        Button(onClick = { Graph.transcription.resume(context, runId) }) {
                             Text(if (status == RunStatus.PAUSED) "Resume" else "Retry failed chunks")
                         }
-                        TextButton(onClick = { Graph.jobController.cancel(runId) }) { Text("Cancel") }
+                        TextButton(onClick = { Graph.transcription.cancel(context, runId) }) {
+                            Text("Cancel")
+                        }
                     }
                 }
                 else -> Unit
             }
 
             if (status == RunStatus.DONE || status == RunStatus.PARTIAL) {
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(Spacing.lg))
                 Text(
                     "Export subtitles",
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.primary
                 )
-                Spacer(Modifier.height(8.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Spacer(Modifier.height(Spacing.sm))
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                     Button(onClick = { srtLauncher.launch("${project?.name ?: "subtitles"}-en.srt") }) {
                         Text("SRT")
                     }
@@ -180,7 +201,7 @@ fun ProcessingScreen(runId: String, onBack: () -> Unit) {
             }
 
             if (chunks.isNotEmpty()) {
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(Spacing.lg))
                 val doneN = chunks.count { it.status == ChunkStatus.DONE.name }
                 val failedN = chunks.count { it.status == ChunkStatus.FAILED.name }
                 val pendingN = chunks.size - doneN - failedN
@@ -198,49 +219,90 @@ fun ProcessingScreen(runId: String, onBack: () -> Unit) {
                 }
             }
 
-            Spacer(Modifier.height(12.dp))
-            Text(
-                "Captions (${segments.size})",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.primary
-            )
+            if (segments.isNotEmpty()) {
+                Text(
+                    "Captions (${segments.size})",
+                    Modifier.padding(top = Spacing.lg),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
 
         LazyColumn(
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+                .padding(horizontal = Spacing.xl),
+            verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
             items(segments, key = { it.id }) { seg ->
-                Column {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Surface(
+                    shape = MaterialTheme.shapes.small,
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh
+                ) {
+                    Column(Modifier.fillMaxWidth().padding(Spacing.md)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                            Text(
+                                TimeFormat.stamp(seg.startMs),
+                                style = MonoSmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Text("→", style = MonoSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(
+                                TimeFormat.stamp(seg.endMs),
+                                style = MonoSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                         Text(
-                            TimeFormat.stamp(seg.startMs),
-                            style = MonoSmall,
-                            color = MaterialTheme.colorScheme.primary
+                            seg.englishText.ifBlank { seg.originalText ?: "" },
+                            style = MaterialTheme.typography.bodyMedium
                         )
-                        Text("→", style = MonoSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(
-                            TimeFormat.stamp(seg.endMs),
-                            style = MonoSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Text(
-                        seg.englishText.ifBlank { seg.originalText ?: "" },
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    if (seg.englishText.isNotBlank() && !seg.originalText.isNullOrBlank()) {
-                        Text(
-                            seg.originalText!!,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        if (seg.englishText.isNotBlank() && !seg.originalText.isNullOrBlank()) {
+                            Text(
+                                seg.originalText!!,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
-            item { Spacer(Modifier.height(32.dp)) }
+            item { Spacer(Modifier.height(Spacing.huge)) }
+        }
+    }
+}
+
+/** Extract → Transcribe → Build stepper; highlighted from the live stage text. */
+@Composable
+private fun StageStepper(stage: String) {
+    val s = stage.lowercase()
+    val steps = listOf(
+        "Extract" to (s.contains("extract")),
+        "Transcribe" to (s.contains("whisper") || s.contains("transcrib") || s.contains("loading")),
+        "Build" to (s.contains("rebuild") || s.contains("complete"))
+    )
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        steps.forEachIndexed { i, (label, active) ->
+            Box(
+                Modifier
+                    .size(8.dp)
+                    .background(
+                        if (active) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.outline,
+                        CircleShape
+                    )
+            )
+            Spacer(Modifier.width(6.dp))
+            Text(
+                label,
+                style = MaterialTheme.typography.labelSmall,
+                color = if (active) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            if (i != steps.lastIndex) {
+                Spacer(Modifier.width(10.dp))
+            }
         }
     }
 }
@@ -258,7 +320,7 @@ private fun StatusChip(status: RunStatus?, doneChunks: Int, totalChunks: Int) {
             if (totalChunks > 0) "$doneChunks/$totalChunks" to Aqua
             else "Queued" to InfoBlue
     }
-    Surface(shape = RoundedCornerShape(50), color = color.copy(alpha = 0.16f)) {
+    Surface(shape = RoundedCornerShape(Radius.pill), color = color.copy(alpha = 0.16f)) {
         Text(
             label,
             Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
