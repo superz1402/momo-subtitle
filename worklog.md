@@ -68,3 +68,75 @@ session resumes from the last section of this file.
   physical device.
 - Phase 1: overlap merging, FFmpeg extraction, bilingual export.
 - Scheduled autosave/health agent job armed (every 30 min).
+
+---
+
+## Session 2 — 2026-11-08 (Asia/Kolkata)
+
+### 10:05 — Server wiped again; full recovery
+- `/home/z/my-project` was reset by the platform: repo, JDK, SDK all gone.
+- Re-cloned `superz1402/momo-subtitle` from GitHub (HEAD `067b3af` — nothing
+  lost; the "commit everything" rule paid off). Healthcheck cron handled the
+  clone + dropped a file-mode-noise checkpoint via `core.fileMode=false`.
+- git credentials re-provisioned via `git credential store` (token kept in
+  `~/.git-credentials`, OUTSIDE the repo).
+
+### 10:20 — [#10][#11][#12] Operator request: background + Play-ready UI + releases
+- Created GitHub issues #10 (foreground service + notification progress),
+  #11 (UI rehaul), #12 (release v0.1.1).
+- Rebuilt toolchain with new idempotent `scripts/setup_sdk.sh` (now committed
+  in-repo): Temurin JDK 17.0.21, cmdline-tools, platform-35, build-tools
+  35.0.0, NDK 27.2.12479018, CMake 3.22.1.
+- UI study (issue #11 prep): cloned owner repos (Your-Files-Redesign, nexpdf,
+  tabit-android, HeyYou) and extracted design tokens + 12 actionable rules;
+  stored patterns in the design report (dark-first, 16dp cards, alpha-tinted
+  icon tiles, splash on 31+, edge-to-edge, no device-info clutter).
+
+### 11:55 — [#10] Foreground service shipped
+- `TranscriptionService` (dataSync FGS): progress notification with per-chunk
+  %, stage text, Pause/Resume/Cancel actions, terminal "Subtitles ready"
+  notification; channel IMPORTANCE_LOW, silent, onlyAlertOnce.
+- Entry points installed via `AppServicesBridge.TranscriptionRunner` so
+  feature modules and the notification share one control path (ImportScreen
+  starts it; ProcessingScreen routes pause/resume/cancel through it).
+- POST_NOTIFICATIONS runtime request on first import (API 33+).
+- Manifest: FOREGROUND_SERVICE + FOREGROUND_SERVICE_DATA_SYNC +
+  POST_NOTIFICATIONS; service registered `exported=false`.
+
+### 12:30 — [#11] UI rehaul shipped
+- `core/ui`: Spacing/Radius/Motion tokens; M3 Shapes (10/16/20dp); real
+  Typography (weight-contrast, tightened display tracking); shared
+  EmptyStateView / SectionLabel / MomoBackHeader.
+- App shell: edge-to-edge cleaned theme XML (no pinned bar colors), API 31+
+  splash (brand bg + launcher icon).
+- Home: stat tiles + hero CTA + EmptyStateView; model/mode mono clutter moved
+  off card titles. Models: letter tiles, delete confirm dialog, `refresh:`
+  debug leak removed. Processing: hero percent + animated bar +
+  Extract→Transcribe→Build stepper. Import: drop-zone sheet + file card.
+  Settings: Device card (ABI/cores/systemInfo) removed. Editor: "Planned
+  capabilities" roadmap card removed. Nav: Models tab uses Build icon.
+
+### 12:40 — [#12] Build green, tests green, release published
+- Build resilience: Maven Central 429-rate-limits the server → JetBrains
+  cache-redirector + Aliyun mirrors first in settings.gradle.kts; daemon heap
+  1536m + workers.max=2 for 4 GB hosts.
+- Compile fixes on the way: feature/import missing Surface import + core:ui
+  ref inlined; feature/models missing remember import; :app missing Build
+  icon import.
+- `:app:assembleDebug` BUILD SUCCESSFUL (349 tasks) — APK 15.4 MB, badging
+  verified (com.momosubtitle.app, v0.1.1, vc2, FGS perms, service with
+  dataSync type, libmomo_whisper_jni.so arm64+x86_64).
+- `test` all modules: 2 suites, 9/9 passing.
+- Committed (the 12:31 cron checkpoint b497194 swept mid-edit work; follow-up
+  7e52d78 adds the last fixes), pushed, tagged **v0.1.1**, GitHub Release
+  438239382 with `momo-subtitle-v0.1.1-debug.apk` asset. APK also copied to
+  `/home/z/my-project/download/`.
+
+### Next
+- Device QA on the Moto G85 5G (docs/TEST_PLAN.md): notification behavior
+  under Doze, backgrounded 1 h+ run, RTF/thermals — needs physical device.
+- Issue #10 follow-up: service restart-after-process-death (START_STICKY +
+  auto-resume from checkpoint) if QA shows kills.
+- Phase 1 features (overlap merging, FFmpeg extraction, bilingual export) —
+  start only on operator go-ahead.
+- Rotate the GitHub PAT pasted in chat (shared in plaintext).
