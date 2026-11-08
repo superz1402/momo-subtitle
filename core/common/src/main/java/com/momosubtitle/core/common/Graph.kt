@@ -28,6 +28,11 @@ object Graph {
             "TranscriptionRunner not installed — the app module must set AppServicesBridge.transcription at startup"
         }
 
+    val modelDownload: AppServicesBridge.ModelDownloadRunner
+        get() = checkNotNull(AppServicesBridge.modelDownload) {
+            "ModelDownloadRunner not installed — the app module must set AppServicesBridge.modelDownload at startup"
+        }
+
     fun init(context: Context) {
         appContext = context.applicationContext
     }
@@ -52,4 +57,17 @@ object AppServicesBridge {
 
     @Volatile
     var transcription: TranscriptionRunner? = null
+
+    /**
+     * Foreground-service entry points for background model downloads, installed
+     * by the app module. Screens only send start/cancel intents here and observe
+     * ModelRepository.downloads — heavy work never runs in the caller.
+     */
+    interface ModelDownloadRunner {
+        fun start(context: Context, specId: String)
+        fun cancel(context: Context, specId: String)
+    }
+
+    @Volatile
+    var modelDownload: ModelDownloadRunner? = null
 }

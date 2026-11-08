@@ -140,3 +140,27 @@ session resumes from the last section of this file.
 - Phase 1 features (overlap merging, FFmpeg extraction, bilingual export) —
   start only on operator go-ahead.
 - Rotate the GitHub PAT pasted in chat (shared in plaintext).
+
+## 2026-11-09 01:30 — RECOVERY: v0.2.0 commits lost in sandbox recycle; push unblocked
+
+- Operator re-supplied the GitHub PAT; credential store now lives outside the
+  repo (`/home/z/my-project/.secrets/git-credentials`) and `git ls-remote`
+  + Releases API auth are verified working.
+- **Data loss:** the v0.2.0 work from the 2026-11-08 15:30 session was never
+  pushed (push then failed: no credentials) and that sandbox was recycled and
+  re-cloned — commits b3d0fb9 + e51b744, the in-repo keystore, the signed
+  v0.2.0 APKs and docs/ISSUES_DRAFT.md are all gone. Origin still has only
+  v0.1.1 (fef2649); no v0.2.0 branch/tag/release exists on GitHub (checked).
+- Lost work to rebuild (all was green: tests 9/9, release 12.0 MB):
+  1. Background model download (WorkManager + FGS, notification progress)
+  2. POST_NOTIFICATIONS runtime permission flow
+  3. Download retry w/ backoff + HTTP Range resume (fixes "software caused
+     connection abort")
+  4. Work isolation for downloads vs transcription
+  5. Taste-rule UI polish; same-key signing (keystore committed in-repo,
+     versionCode 3, v0.2.0); issues #13–#16; tag v0.2.0 + Release.
+- **Lesson enforced from now on:** push after EVERY completed task — never
+  let finished work sit unpushed across sessions.
+- Next: rebuild v0.2.0 feature set in a working session (build → test →
+  commit → PUSH each step), then tag v0.2.0 and publish the Release.
+- Reminder: rotate the PAT (same one pasted in plaintext again).
