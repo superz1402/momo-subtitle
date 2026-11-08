@@ -197,3 +197,17 @@ session resumes from the last section of this file.
   Wi-Fi-drop retry, notification behavior, RTF/thermals); START_STICKY
   follow-up only if QA shows kills; Phase 1 only on operator go-ahead;
   rotate the PAT (same one again pasted in plaintext).
+
+## 2026-11-09 02:40 — [#13] Branded notification icon (operator feedback)
+
+- Both services used `android.R.drawable.stat_sys_download` — the system
+  download arrow ("like Chrome"). Added `res/drawable/ic_notification.xml`:
+  monochrome white subtitle-panel glyph (rounded frame + two caption bars,
+  evenOdd), matching the launcher brand mark. Verified by rasterizing the
+  path — renders correctly as a silhouette.
+- `TranscriptionService` + `ModelDownloadService`: progress, terminal
+  success and error notifications all use `R.drawable.ic_notification`.
+- Rebuilt both APKs; same cert SHA-256 `e9f67c10…` (installs over).
+- v0.2.0 tag force-moved to 79082ec; release 438427677 assets replaced
+  (old APKs deleted, icon-fixed APKs uploaded); follow-up comment on #13.
+- Next: Moto G85 device QA; Phase 1 only on operator go-ahead.
