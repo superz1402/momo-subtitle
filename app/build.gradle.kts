@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -11,7 +13,7 @@ android {
     // Persistent release signing: the keystore lives in-repo (keystore/) so the
     // same key survives server wipes — updates always install over previous
     // versions. Deliberate tradeoff, flagged to the operator (docs/RELEASE_CHECKLIST.md).
-    val momoKeystoreProps = java.util.Properties().apply {
+    val momoKeystoreProps = Properties().apply {
         val f = rootProject.file("keystore/momo.properties")
         if (f.exists()) f.inputStream().use { load(it) }
     }

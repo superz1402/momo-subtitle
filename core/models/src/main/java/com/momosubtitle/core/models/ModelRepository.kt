@@ -9,6 +9,8 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.cancellation.CancellationException
+import kotlin.coroutines.coroutineContext
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
@@ -146,7 +148,7 @@ class ModelRepository(
                 if (attempt == MAX_ATTEMPTS) break
                 // Exponential backoff with jitter; delay() is cancellable.
                 emitProgress(spec, part.length(), speedBps = 0)
-                delay(BACKOFF_MS[attempt - 1] + Random.nextLong(1_000))
+                delay(BACKOFF_MS[attempt - 1] + Random.nextLong(1_000L))
             }
         }
 
@@ -167,7 +169,7 @@ class ModelRepository(
     }
 
     /** One HTTP attempt. Keeps [part] at whatever bytes landed (resume anchor). */
-    private fun downloadOnce(spec: ModelSpec, part: File) {
+    private suspend fun downloadOnce(spec: ModelSpec, part: File) {
         var offset = if (part.exists()) part.length() else 0L
         if (offset >= spec.sizeBytes) return // complete on disk; SHA check decides
 
@@ -202,7 +204,7 @@ class ModelRepository(
                     var lastEmit = offset
                     val startedNanos = System.nanoTime()
                     while (true) {
-                        ensureActive() // cancellation keeps the .part file for resume
+                        coroutineContext.ensureActive() // cancellation keeps the .part file for resume
                         val n = stream.read(buffer)
                         if (n < 0) break
                         raf.write(buffer, 0, n)
