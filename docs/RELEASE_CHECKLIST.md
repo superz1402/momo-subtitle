@@ -30,6 +30,11 @@
 5. R8/minification decision: currently **disabled**. Enabling requires:
    `-keep` rules verified for `WhisperJni` (present in `proguard-rules.pro`),
    kotlinx-serialization rules tested, and a full regression pass.
-6. Signing: replace debug APK distribution with a proper keystore (never commit
-   the keystore or its passwords).
+6. Signing: RESOLVED in v0.2.0 — a dedicated release keystore is committed
+   in-repo (`keystore/momo-release.jks` + `keystore/momo.properties`), and the
+   `momo` signingConfig is applied to BOTH release and debug builds. The
+   never-commit rule was deliberately inverted: a public repo plus frequently
+   wiped servers make repo-committed keys the only way to guarantee the same
+   key (and therefore same-key updates) forever. Rotate the keystore only via
+   Google Play key reset; never delete it from the repo.
 7. Changelog via tagged releases; AGENTS.md engineering rules re-verified.

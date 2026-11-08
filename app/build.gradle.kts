@@ -8,12 +8,29 @@ android {
     namespace = "com.momosubtitle.app"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
+    // Persistent release signing: the keystore lives in-repo (keystore/) so the
+    // same key survives server wipes — updates always install over previous
+    // versions. Deliberate tradeoff, flagged to the operator (docs/RELEASE_CHECKLIST.md).
+    val momoKeystoreProps = java.util.Properties().apply {
+        val f = rootProject.file("keystore/momo.properties")
+        if (f.exists()) f.inputStream().use { load(it) }
+    }
+
+    signingConfigs {
+        create("momo") {
+            storeFile = rootProject.file(momoKeystoreProps.getProperty("storeFile"))
+            storePassword = momoKeystoreProps.getProperty("storePassword")
+            keyAlias = momoKeystoreProps.getProperty("keyAlias")
+            keyPassword = momoKeystoreProps.getProperty("keyPassword")
+        }
+    }
+
     defaultConfig {
         applicationId = "com.momosubtitle.app"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 2
-        versionName = "0.1.1"
+        versionCode = 3
+        versionName = "0.2.0"
 
         ndk {
             // Moto G85 5G (arm64-v8a) + x86_64 emulator.
@@ -34,6 +51,12 @@ android {
             // R8 stays disabled for Milestone 0.1 (see docs/RELEASE_CHECKLIST.md before enabling).
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("momo")
+        }
+        debug {
+            // Same key for debug builds so a debug install never conflicts with
+            // the release signature — every update installs over the last one.
+            signingConfig = signingConfigs.getByName("momo")
         }
     }
 

@@ -1,6 +1,7 @@
 package com.momosubtitle.app
 
 import android.app.Application
+import com.momosubtitle.app.service.ModelDownloadService
 import com.momosubtitle.app.service.TranscriptionService
 import com.momosubtitle.core.common.AppServicesBridge
 import com.momosubtitle.core.common.Graph
@@ -31,6 +32,15 @@ class MomoApp : Application() {
 
             override fun cancel(context: android.content.Context, runId: String) =
                 TranscriptionService.cancel(context, runId)
+        }
+
+        // Background model downloads: foreground service + notification progress.
+        AppServicesBridge.modelDownload = object : AppServicesBridge.ModelDownloadRunner {
+            override fun start(context: android.content.Context, specId: String) =
+                ModelDownloadService.start(context, specId)
+
+            override fun cancel(context: android.content.Context, specId: String) =
+                ModelDownloadService.cancel(context, specId)
         }
     }
 }
