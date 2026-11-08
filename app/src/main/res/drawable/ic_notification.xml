@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Notification small icon: monochrome white glyph for the status bar.
+     Subtitle panel frame with two caption bars (Momo brand mark).
+     evenOdd fill: outer rounded rect filled, inner rect cuts the window,
+     the two caption bars inside the window flip back to filled. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M6.5,4 L17.5,4 A2.5,2.5 0 0 1 20,6.5 L20,17.5 A2.5,2.5 0 0 1 17.5,20 L6.5,20 A2.5,2.5 0 0 1 4,17.5 L4,6.5 A2.5,2.5 0 0 1 6.5,4 Z M7,6 L17,6 A1,1 0 0 1 18,7 L18,17 A1,1 0 0 1 17,18 L7,18 A1,1 0 0 1 6,17 L6,7 A1,1 0 0 1 7,6 Z M8.75,10 L14.25,10 A0.75,0.75 0 0 1 15,10.75 L15,11.25 A0.75,0.75 0 0 1 14.25,12 L8.75,12 A0.75,0.75 0 0 1 8,11.25 L8,10.75 A0.75,0.75 0 0 1 8.75,10 Z M8.75,14 L15.25,14 A0.75,0.75 0 0 1 16,14.75 L16,15.25 A0.75,0.75 0 0 1 15.25,16 L8.75,16 A0.75,0.75 0 0 1 8,15.25 L8,14.75 A0.75,0.75 0 0 1 8.75,14 Z" />
+</vector>

@@ -12,6 +12,7 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.momosubtitle.app.MainActivity
+import com.momosubtitle.app.R
 import com.momosubtitle.core.common.Graph
 import com.momosubtitle.core.common.job.RunStatus
 import kotlinx.coroutines.CoroutineScope
@@ -172,7 +173,7 @@ class TranscriptionService : Service() {
         val percent = if (total > 0) (done * 100 / total) else 0
         val runId = shownRunId.orEmpty()
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.stat_sys_download)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentIntent(contentIntent())
             .setOnlyAlertOnce(true)
             .setSilent(true)
@@ -215,10 +216,7 @@ class TranscriptionService : Service() {
             else -> "Transcription cancelled" to name
         }
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(
-                if (status == RunStatus.DONE) android.R.drawable.stat_sys_download_done
-                else android.R.drawable.stat_notify_error
-            )
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(text)
             .setContentIntent(contentIntent())

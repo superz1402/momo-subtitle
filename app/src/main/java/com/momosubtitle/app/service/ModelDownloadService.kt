@@ -11,6 +11,7 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.momosubtitle.core.common.Graph
 import com.momosubtitle.core.common.TimeFormat
+import com.momosubtitle.app.R
 import com.momosubtitle.core.models.DownloadProgress
 import com.momosubtitle.core.models.ModelCatalog
 import com.momosubtitle.core.models.ModelRepository
@@ -173,7 +174,7 @@ class ModelDownloadService : Service() {
 
     private fun notifyFinal(title: String, text: String, error: Boolean) {
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(if (error) android.R.drawable.stat_notify_error else android.R.drawable.stat_sys_download_done)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(text)
             .setContentIntent(contentIntent())
@@ -188,7 +189,7 @@ class ModelDownloadService : Service() {
         cancellable: Boolean
     ): Notification {
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.stat_sys_download)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentIntent(contentIntent())
             .setOnlyAlertOnce(true)
             .setSilent(true)
